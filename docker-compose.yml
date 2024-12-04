@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  orbify_task_api:
+    build: .
+    ports:
+      - "$API_PORT:$API_PORT"
+    container_name: orbify_task_api
+    command: bash -c "cd app && alembic upgrade head && fastapi run main.py --port $API_PORT"
+    restart: unless-stopped
+    environment:
+      - PG_HOSTNAME=$POSTGRES_SERVER
+      - DEVELOPMENT=True
+    depends_on:
+      - postgresql
+  postgresql:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    ports:
+      - "$POSTGRES_PORT:$POSTGRES_PORT"
+    container_name: orbify_postgresql
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: -p $POSTGRES_PORT
+
+volumes:
+  postgres_data:
+    
